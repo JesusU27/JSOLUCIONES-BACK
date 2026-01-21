@@ -729,7 +729,7 @@ Esta arquitectura plantea una separación por módulos y usando el patrón MVT (
 
 ### 2. Explicar cuándo usar clases vs funciones.
 
-Aunque las 2 estructuras se usan para lo mismo, la cual es reutilizar código a partir de una estructura ya definida, las clases se usan para estructurar una entidad, mientras que las funciones se usan para realizar ciertas acciones.
+Las clases son plantillas para crear objetos que agrupan datos (atributos) y comportamientos (métodos), modelando entidades complejas, mientras que las funciones son bloques de código independientes que realizan tareas específicas y reutilizables, sin estar atadas a una clase, aunque dentro de una clase una función se convierte en un método. La clave es que las clases definen la estructura (el "qué" es algo), y las funciones/métodos son las acciones (el "qué hace"). 
 
 
 ### 3. Refactorizar código desordenado (se entregará ejemplo).
@@ -749,11 +749,11 @@ Finalmente, la presencia de una capa de servicios y utilidades reduce el acoplam
 
 ## (código realizado en la ubicación de este archivo)
 
-#### 1. CRUD de productos y clientes.
-#### 2. Registro de ventas.
-#### 3. Persistencia de datos (SQLite o archivos).
-#### 4. Separación por capas (servicios, modelos).
-#### 5. Manejo de errores y validaciones.
+#### 1. CRUD de productos y clientes. [hecho]
+#### 2. Registro de ventas. [hecho]
+#### 3. Persistencia de datos (SQLite o archivos). [hecho]
+#### 4. Separación por capas (servicios, modelos). [hecho]
+#### 5. Manejo de errores y validaciones. [hecho]
 
 
 ## SECCIÓN 5 – CRITERIO PROFESIONAL (5%)
@@ -836,12 +836,23 @@ VITE_API_BASE_URL=http://127.0.0.1:8000/api/
 LINK DE DESPLIEGUE DE SERVICIO WEB (DOCUMENTACION) A INTERNET: https://jsoluciones-back.onrender.com/api/docs
 LINK DE DESPLIEGUE DE FRONT END A INTERNET: https://jsolucionesfront.vercel.app
 
-(la base de datos esta integrada en el despliegue,por lo que en un redeploy se pueden borrar los datos)
+la base de datos esta integrada en el despliegue (sqlite),por lo que en un redeploy se pueden borrar los datos. Por ello es mejor verificar en el front end si el login funciona con cualquiera de estos datos:
 
-EL PRIMER USUARIO CREADO EN api/auth/registro siempre sera admin, para demostración
+ADMIN: adminJS@gmail.com | JSsoluciones4848
+USER (cliente): clienteJS@gmail.com | JSsoluciones2121
+
+si no hay cuentas, quiere decir que los datos se han borrado debido a un re-despliegue, entonces procederemos a crear los datos desde la documentación del despliegue del backend.
+
+Caso contrario si deje iniciar sesión, podemos usar normalmente el front end.
+
+A continuación se detallaran los pasos para hacer solo las cuentas, posteriormente a esto, podemos regresar al login del front end y utilizarlo normalmente.
+
 
 (usar el link de despliegue para crear los datos)
-puede usar para un administrador:
+https://jsoluciones-back.onrender.com/api/docs
+
+y dirigirse al apartado api/auth/registro, el primer usuario creado siempre sera admin, para demostración
+puede usar para este dato:
 
 ```
 {
@@ -858,7 +869,7 @@ puede usar para un administrador:
 
 ```
 
-para un cliente
+luego genere los datos del usuario para un cliente:
 
 ```
 {
@@ -873,3 +884,5 @@ para un cliente
   "direccion": "example"
 }
 ```
+
+Como mencioné anteriormente, si el front end ya valida estos datos quiere decir que la base de datos no ha sido reiniciada y se puede utilizar de manera normal.
