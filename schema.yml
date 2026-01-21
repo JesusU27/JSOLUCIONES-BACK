@@ -1,0 +1,954 @@
+openapi: 3.0.3
+info:
+  title: ERP Ventas API
+  version: 1.0.0
+  description: API para sistema de ventas - Mini ERP
+paths:
+  /api/auth/login/:
+    post:
+      operationId: api_auth_login_create
+      description: Personaliza la respuesta del login para incluir userType
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Login'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Login'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Login'
+          description: ''
+  /api/auth/refresh/:
+    post:
+      operationId: api_auth_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/clientes/:
+    get:
+      operationId: api_clientes_list
+      description: ViewSet solo lectura para que admins vean lista de clientes
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedClienteList'
+          description: ''
+  /api/clientes/{id}/:
+    get:
+      operationId: api_clientes_retrieve
+      description: ViewSet solo lectura para que admins vean lista de clientes
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Cliente.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cliente'
+          description: ''
+  /api/clientes/cuenta/actualizar_perfil/:
+    put:
+      operationId: api_clientes_cuenta_actualizar_perfil_update
+      description: Actualizar datos del perfil
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Cliente'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Cliente'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Cliente'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cliente'
+          description: ''
+  /api/clientes/cuenta/cambiar_password/:
+    post:
+      operationId: api_clientes_cuenta_cambiar_password_create
+      description: Cambiar contraseña del cliente
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CambiarPassword'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CambiarPassword'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CambiarPassword'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Contraseña actualizada exitosamente
+          description: ''
+  /api/clientes/cuenta/perfil/:
+    get:
+      operationId: api_clientes_cuenta_perfil_retrieve
+      description: Obtener perfil del cliente autenticado
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cliente'
+          description: ''
+  /api/clientes/registro/:
+    post:
+      operationId: api_clientes_registro_create
+      description: Vista solo para registrar nuevos clientes
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Registro'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Registro'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Registro'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Registro'
+          description: ''
+  /api/productos/:
+    get:
+      operationId: api_productos_list
+      description: |-
+        ViewSet para gestionar productos.
+        - GET: Público (ver productos disponibles)
+        - POST/PUT/PATCH/DELETE: Solo admin
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProductoList'
+          description: ''
+    post:
+      operationId: api_productos_create
+      description: |-
+        ViewSet para gestionar productos.
+        - GET: Público (ver productos disponibles)
+        - POST/PUT/PATCH/DELETE: Solo admin
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Producto'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Producto'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Producto'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Producto'
+          description: ''
+  /api/productos/{id}/:
+    get:
+      operationId: api_productos_retrieve
+      description: |-
+        ViewSet para gestionar productos.
+        - GET: Público (ver productos disponibles)
+        - POST/PUT/PATCH/DELETE: Solo admin
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Producto.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Producto'
+          description: ''
+    put:
+      operationId: api_productos_update
+      description: |-
+        ViewSet para gestionar productos.
+        - GET: Público (ver productos disponibles)
+        - POST/PUT/PATCH/DELETE: Solo admin
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Producto.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Producto'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Producto'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Producto'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Producto'
+          description: ''
+    patch:
+      operationId: api_productos_partial_update
+      description: |-
+        ViewSet para gestionar productos.
+        - GET: Público (ver productos disponibles)
+        - POST/PUT/PATCH/DELETE: Solo admin
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Producto.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProducto'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProducto'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProducto'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Producto'
+          description: ''
+    delete:
+      operationId: api_productos_destroy
+      description: |-
+        ViewSet para gestionar productos.
+        - GET: Público (ver productos disponibles)
+        - POST/PUT/PATCH/DELETE: Solo admin
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Producto.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/ventas/:
+    post:
+      operationId: api_ventas_create
+      description: Vista para que clientes autenticados creen ventas
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VentaCrear'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VentaCrear'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VentaCrear'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VentaCrear'
+          description: ''
+  /api/ventas/admin/:
+    get:
+      operationId: api_ventas_admin_list
+      description: ViewSet de solo lectura para que admins vean todas las ventas
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedVentaListaList'
+          description: ''
+  /api/ventas/admin/{id}/:
+    get:
+      operationId: api_ventas_admin_retrieve
+      description: ViewSet de solo lectura para que admins vean todas las ventas
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Venta.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VentaLista'
+          description: ''
+  /api/ventas/cliente/mis_compras/:
+    get:
+      operationId: api_ventas_cliente_mis_compras_retrieve
+      description: Obtener historial de compras del cliente autenticado
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VentaCliente'
+          description: ''
+  /api/ventas/cliente/resumen/:
+    get:
+      operationId: api_ventas_cliente_resumen_retrieve
+      description: Obtener resumen de todas las ventas (solo admin)
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VentaCliente'
+          description: ''
+components:
+  schemas:
+    CambiarPassword:
+      type: object
+      description: Serializador para cambiar contraseña
+      properties:
+        password_actual:
+          type: string
+          writeOnly: true
+        password_nueva:
+          type: string
+          writeOnly: true
+        password_nueva2:
+          type: string
+          writeOnly: true
+      required:
+      - password_actual
+      - password_nueva
+      - password_nueva2
+    Cliente:
+      type: object
+      description: Serializador para mostrar datos del cliente
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        documento:
+          type: string
+          description: DNI, RUC o documento de identidad
+          maxLength: 20
+        telefono:
+          type: string
+          description: Teléfono de contacto
+          maxLength: 20
+        direccion:
+          type: string
+          nullable: true
+          description: Dirección de entrega
+        total_compras:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - documento
+      - email
+      - id
+      - total_compras
+      - username
+    DetalleVentaCliente:
+      type: object
+      description: Serializador para mostrar detalles de compra al cliente
+      properties:
+        producto_nombre:
+          type: string
+          readOnly: true
+        producto_descripcion:
+          type: string
+          readOnly: true
+        cantidad:
+          type: integer
+          readOnly: true
+          description: Cantidad de unidades vendidas
+        precio_unitario:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+          description: Precio unitario al momento de la venta
+        subtotal:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+          description: Subtotal (cantidad × precio_unitario)
+      required:
+      - cantidad
+      - precio_unitario
+      - producto_descripcion
+      - producto_nombre
+      - subtotal
+    DetalleVentaSimple:
+      type: object
+      description: Serializador simplificado para crear detalles de venta (solo producto
+        y cantidad)
+      properties:
+        producto:
+          type: integer
+        cantidad:
+          type: integer
+      required:
+      - cantidad
+      - producto
+    EstadoEnum:
+      enum:
+      - PENDIENTE
+      - COMPLETADA
+      - CANCELADA
+      type: string
+      description: |-
+        * `PENDIENTE` - Pendiente
+        * `COMPLETADA` - Completada
+        * `CANCELADA` - Cancelada
+    Login:
+      type: object
+      description: Serializador personalizado para login con email
+      properties:
+        email:
+          type: string
+          writeOnly: true
+        password:
+          type: string
+          writeOnly: true
+      required:
+      - email
+      - password
+    PaginatedClienteList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Cliente'
+    PaginatedProductoList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Producto'
+    PaginatedVentaListaList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/VentaLista'
+    PatchedProducto:
+      type: object
+      description: Serializador para productos
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        codigo:
+          type: string
+          description: Código único del producto (SKU)
+          maxLength: 50
+        nombre:
+          type: string
+          description: Nombre del producto
+          maxLength: 200
+        descripcion:
+          type: string
+          nullable: true
+          description: Descripción detallada del producto
+        precio:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          description: Precio unitario del producto
+        stock:
+          type: integer
+          minimum: 0
+          description: Cantidad disponible en inventario
+        categoria:
+          type: string
+          description: Categoría del producto
+          maxLength: 100
+        activo:
+          type: boolean
+          description: Si el producto está disponible para la venta
+        imagen_url:
+          type: string
+          format: uri
+          nullable: true
+          description: URL de la imagen del producto
+          maxLength: 200
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+    Producto:
+      type: object
+      description: Serializador para productos
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        codigo:
+          type: string
+          description: Código único del producto (SKU)
+          maxLength: 50
+        nombre:
+          type: string
+          description: Nombre del producto
+          maxLength: 200
+        descripcion:
+          type: string
+          nullable: true
+          description: Descripción detallada del producto
+        precio:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          description: Precio unitario del producto
+        stock:
+          type: integer
+          minimum: 0
+          description: Cantidad disponible en inventario
+        categoria:
+          type: string
+          description: Categoría del producto
+          maxLength: 100
+        activo:
+          type: boolean
+          description: Si el producto está disponible para la venta
+        imagen_url:
+          type: string
+          format: uri
+          nullable: true
+          description: URL de la imagen del producto
+          maxLength: 200
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - codigo
+      - created_at
+      - id
+      - nombre
+      - precio
+    Registro:
+      type: object
+      description: Serializador para registro de nuevos clientes
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        password:
+          type: string
+          writeOnly: true
+        password2:
+          type: string
+          writeOnly: true
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        documento:
+          type: string
+          description: DNI, RUC o documento de identidad
+          maxLength: 20
+        telefono:
+          type: string
+          description: Teléfono de contacto
+          maxLength: 20
+        direccion:
+          type: string
+          nullable: true
+          description: Dirección de entrega
+      required:
+      - documento
+      - email
+      - first_name
+      - last_name
+      - password
+      - password2
+      - username
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+      required:
+      - access
+      - refresh
+    VentaCliente:
+      type: object
+      description: Serializador para mostrar ventas/compras del cliente
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        fecha_venta:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Fecha y hora de la venta
+        total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+          description: Monto total de la venta
+        estado:
+          allOf:
+          - $ref: '#/components/schemas/EstadoEnum'
+          readOnly: true
+          description: |-
+            Estado actual de la venta
+
+            * `PENDIENTE` - Pendiente
+            * `COMPLETADA` - Completada
+            * `CANCELADA` - Cancelada
+        detalles:
+          type: array
+          items:
+            $ref: '#/components/schemas/DetalleVentaCliente'
+          readOnly: true
+        observaciones:
+          type: string
+          readOnly: true
+          nullable: true
+          description: Observaciones o notas adicionales
+      required:
+      - detalles
+      - estado
+      - fecha_venta
+      - id
+      - observaciones
+      - total
+    VentaCrear:
+      type: object
+      description: Serializador para crear una venta con sus detalles
+      properties:
+        detalles:
+          type: array
+          items:
+            $ref: '#/components/schemas/DetalleVentaSimple'
+        observaciones:
+          type: string
+      required:
+      - detalles
+    VentaLista:
+      type: object
+      description: Serializador simplificado para listar ventas con detalles de productos
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        cliente_nombre:
+          type: string
+          readOnly: true
+        fecha_venta:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Fecha y hora de la venta
+        total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+          description: Monto total de la venta
+        estado:
+          allOf:
+          - $ref: '#/components/schemas/EstadoEnum'
+          readOnly: true
+          description: |-
+            Estado actual de la venta
+
+            * `PENDIENTE` - Pendiente
+            * `COMPLETADA` - Completada
+            * `CANCELADA` - Cancelada
+        cantidad_total:
+          type: string
+          readOnly: true
+        detalles:
+          type: array
+          items:
+            $ref: '#/components/schemas/DetalleVentaCliente'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - cantidad_total
+      - cliente_nombre
+      - created_at
+      - detalles
+      - estado
+      - fecha_venta
+      - id
+      - total
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
