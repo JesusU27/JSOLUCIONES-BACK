@@ -356,6 +356,7 @@ LINK DE DESPLIEGUE DE FRONT END A INTERNET: https://jsolucionesfront.vercel.app
 
 EL PRIMER USUARIO CREADO EN api/auth/registro siempre sera admin, para demostración
 
+(usar el link de despliegue para crear los datos)
 puede usar para un administrador:
 
 ```
