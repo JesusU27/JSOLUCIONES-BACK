@@ -342,3 +342,49 @@ documentación: http://127.0.0.1:8000/api/docs (si esta en ejecución)
 ## FRONT END:
 
 1. Ejecución 
+
+- npm install
+- npm run dev
+
+
+
+
+LINK DE DESPLIEGUE DE SERVICIO WEB (DOCUMENTACION) A INTERNET: https://jsoluciones-back.onrender.com/api/docs
+LINK DE DESPLIEGUE DE FRONT END A INTERNET: https://jsolucionesfront.vercel.app
+
+(la base de datos esta integrada en el despliegue,por lo que en un redeploy se pueden borrar los datos)
+
+EL PRIMER USUARIO CREADO EN api/auth/registro siempre sera admin, para demostración
+
+puede usar para un administrador:
+
+```
+{
+  "email": "adminJS@gmail.com",
+  "username": "ForemannNI19",
+  "password": "JSsoluciones4848",
+  "password2": "JSsoluciones4848",
+  "first_name": "Erick",
+  "last_name": "Foremann",
+  "documento": "38024803",
+  "telefono": "38297566",
+  "direccion": "example"
+}
+
+```
+
+para un cliente
+
+```
+{
+  "email": "clienteJS@gmail.com",
+  "username": "Cliente1234",
+  "password": "JSsoluciones2121",
+  "password2": "JSsoluciones2121",
+  "first_name": "Robert",
+  "last_name": "Chase",
+  "documento": "45458100",
+  "telefono": "466188900",
+  "direccion": "example"
+}
+```
