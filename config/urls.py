@@ -19,7 +19,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
-from apps.clientes.views import RegistroViewSet, LoginView, ClienteViewSet, ClientesListViewSet
+from apps.clientes.views import RegistroClienteView, LoginView, ClienteViewSet, ClientesListViewSet
 from apps.productos.views import ProductoViewSet
 from apps.ventas.views import VentaAdminViewSet, VentaCrearViewSet, VentaClienteViewSet
 
@@ -36,8 +36,9 @@ urlpatterns = [
     path('api/', include(router.urls)),
     
     # Registro de clientes (solo POST)
-    path('api/clientes/registro/', RegistroViewSet.as_view(), name='cliente-registro'),
-    
+    path('api/auth/registro/', RegistroClienteView.as_view(), name='cliente-registro'),
+
+
     # Crear venta (clientes autenticados)
     path('api/ventas/', VentaCrearViewSet.as_view(), name='venta-crear'),
     

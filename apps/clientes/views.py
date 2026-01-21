@@ -11,11 +11,12 @@ from apps.clientes.serializers import (
 )
 
 
-class RegistroViewSet(generics.CreateAPIView):
+class RegistroClienteView(generics.CreateAPIView):
     """Vista solo para registrar nuevos clientes"""
     queryset = Cliente.objects.all()
     serializer_class = RegistroSerializer
     permission_classes = [permissions.AllowAny]
+    authentication_classes = []
 
 
 class ClientesListViewSet(viewsets.ReadOnlyModelViewSet):
