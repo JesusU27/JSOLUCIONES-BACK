@@ -187,7 +187,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5174",
     "http://localhost:8080",  # Vue
     "http://127.0.0.1:3000",
-    "https://jsolucionesfront.vercel.app"
+    "https://jsolucionesfront.vercel.app",
+    "https://jsolucionesfront-f4x2dogwd-xyisus-projects.vercel.app"
 ]
 
 CORS_ALLOW_CREDENTIALS = True
