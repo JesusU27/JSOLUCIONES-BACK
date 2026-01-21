@@ -298,3 +298,47 @@ Aplico principios como SOLID, DRY y KISS, mantengo separación clara de responsa
 ### 4. ¿Cómo aseguras escalabilidad?
 
 Diseño el sistema pensando en el crecimiento desde el inicio: arquitectura modular, bajo acoplamiento y capas bien definidas. Evito cuellos de botella, uso caching, paginación y asincronía cuando es necesario, y me apoyo en métricas para tomar decisiones basadas en datos. La escalabilidad no es solo técnica, también implica que el código sea fácil de extender y que el equipo pueda trabajar en paralelo sin fricciones.
+
+
+# CONSIDERACIONES PARA LA EJECUCIÓN DE LAS APLICACIONES
+
+## BACKEND:
+
+1. crear variables de entorno (archivo .env):
+
+variables de ejemplo:
+
+```
+DEBUG=True (desarrollo o producción)
+SECRET_KEY=your-secret-key
+ALLOWED_HOSTS=localhost,127.0.0.1
+DATABASE_URL=sqlite:///db.sqlite3
+
+```
+
+2. entorno de desarrollo:
+
+Ejecutar (en el cmd de la raiz del proyecto):
+
+- python -m venv venv
+- venv\Scripts\activate
+
+- pip install -r requirements.txt (instala las dependencias en el entorno virtual)
+
+
+3. Ejecución de la aplicación (en el cmd de la raiz del proyecto):
+
+- python manage.py makemigrations (crea migraciones a partir de los modelos)
+
+- python manage.py migrate (aplica la migracion a la base de datos)
+
+- python manage.py runserver (ejecuta el programa)
+
+
+documentación: http://127.0.0.1:8000/api/docs (si esta en ejecución)
+
+
+
+## FRONT END:
+
+1. Ejecución 
