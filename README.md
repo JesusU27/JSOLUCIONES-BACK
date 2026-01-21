@@ -152,10 +152,485 @@ def funcion():
 
 ## SECCIÓN 2 – LÓGICA Y MANEJO DE DATOS (20%)
 
-### 1. Calculen ingresos totales.
-### 2. Filtren transacciones por rango de fechas.
-### 3. Obtengan el cliente con mayor consumo.
-### 4. Manejen errores de datos inválidos.
+en base a la base de datos del proyecto:
+
+```
+
+┌─────────────────┐
+│   CLIENTE/USER  │ (Usuario que compra)
+├─────────────────┤
+│ id (PK)         │
+│ username        │
+│ email           │
+│ password        │
+│ first_name      │
+│ last_name       │
+│ documento       │
+│ telefono        │
+│ direccion       │
+│ is_active       │
+│ created_at      │
+│ updated_at      │
+└────────┬────────┘
+         │
+         │ 1:N (comprador)
+         │
+         ▼
+┌─────────────────┐
+│   PRODUCTOS     │
+├─────────────────┤
+│ id (PK)         │
+│ codigo          │
+│ nombre          │
+│ descripcion     │
+│ precio          │
+│ stock           │
+│ categoria       │
+│ activo          │
+│ imagen_url      │
+│ created_at      │
+│ updated_at      │
+└────────┬────────┘
+         │
+         │
+         │              ┌─────────────────┐
+         │              │    VENTAS       │
+         │              ├─────────────────┤
+         │              │ id (PK)         │
+         │         ┌────│ cliente_id (FK) │
+         │         │    │ fecha_venta     │
+         │         │    │ total           │
+         │         │    │ estado          │
+         │         │    │ observaciones   │
+         │         │    │ created_at      │
+         │         │    │ updated_at      │
+         │         │    └────────┬────────┘
+         │         │             │
+         └─────────┼─────────────┘
+                   │             │ 1:N
+                   │             │
+                   │     ┌───────▼───────────┐
+                   └─────► DETALLE_VENTA     │
+                    N:1  ├───────────────────┤
+                         │ id (PK)           │
+                         │ venta_id (FK)     │
+                         │ producto_id (FK)  │
+                         │ cantidad          │
+                         │ precio_unitario   │
+                         │ subtotal          │
+                         │ created_at        │
+                         └───────────────────┘
+
+```
+
+📊 QUERIES SQL Y DJANGO ORM
+
+1️. Calcular Ingresos TotalesSQL (MySQL):
+sql-- Ingresos totales de todas las ventas completadas
+
+```
+SELECT 
+    SUM(total) as ingresos_totales,
+    COUNT(*) as total_ventas
+FROM ventas
+WHERE estado = 'COMPLETADA';
+```
+-- Ingresos totales por cliente específico
+
+```
+SELECT 
+    c.id,
+    c.first_name,
+    c.last_name,
+    c.email,
+    SUM(v.total) as total_gastado,
+    COUNT(v.id) as numero_compras
+FROM clientes c
+LEFT JOIN ventas v ON c.id = v.cliente_id
+WHERE v.estado = 'COMPLETADA'
+GROUP BY c.id, c.first_name, c.last_name, c.email;
+```
+-- Ingresos totales del sistema (todas las ventas completadas)
+```
+SELECT 
+    SUM(v.total) as ingresos_totales,
+    COUNT(v.id) as total_ventas,
+    AVG(v.total) as promedio_venta,
+    MIN(v.total) as venta_minima,
+    MAX(v.total) as venta_maxima
+FROM ventas v
+WHERE v.estado = 'COMPLETADA';Django ORM:
+pythonfrom django.db.models import Sum, Count, Avg, Min, Max
+from apps.ventas.models import Venta
+
+```
+
+Ingresos totales del sistema:
+
+```
+ingresos = Venta.objects.filter(estado='COMPLETADA').aggregate(
+    ingresos_totales=Sum('total'),
+    total_ventas=Count('id'),
+    promedio_venta=Avg('total'),
+    venta_minima=Min('total'),
+    venta_maxima=Max('total')
+)
+
+# Resultado: 
+# {
+#     'ingresos_totales': Decimal('15000.00'),
+#     'total_ventas': 50,
+#     'promedio_venta': Decimal('300.00'),
+#     ...
+# }
+```
+
+
+Ingresos totales de un cliente específico:
+
+```
+from apps.clientes.models import Cliente
+
+cliente = Cliente.objects.get(id=1)
+ingresos_cliente = cliente.compras.filter(estado='COMPLETADA').aggregate(
+    total_gastado=Sum('total'),
+    numero_compras=Count('id')
+)
+```
+
+2️. Filtrar Transacciones por Rango de FechasSQL (MySQL):
+sql-- Ventas entre dos fechas específicas
+
+```
+SELECT 
+    v.id,
+    v.fecha_venta,
+    v.total,
+    v.estado,
+    c.first_name,
+    c.last_name,
+    c.email
+FROM ventas v
+INNER JOIN clientes c ON v.cliente_id = c.id
+WHERE v.fecha_venta BETWEEN '2025-01-01' AND '2025-01-31'
+    AND v.estado = 'COMPLETADA'
+ORDER BY v.fecha_venta DESC;
+```
+-- Ventas con detalles en un rango de fechas
+
+```
+SELECT 
+    v.id as venta_id,
+    v.fecha_venta,
+    v.total as total_venta,
+    c.first_name,
+    c.last_name,
+    p.nombre as producto,
+    dv.cantidad,
+    dv.precio_unitario,
+    dv.subtotal
+FROM ventas v
+INNER JOIN clientes c ON v.cliente_id = c.id
+INNER JOIN detalle_ventas dv ON v.id = dv.venta_id
+INNER JOIN productos p ON dv.producto_id = p.id
+WHERE v.fecha_venta BETWEEN '2025-01-01 00:00:00' AND '2025-01-31 23:59:59'
+ORDER BY v.fecha_venta DESC, v.id, dv.id;
+```
+-- Resumen de ventas por mes
+```
+SELECT 
+    YEAR(fecha_venta) as anio,
+    MONTH(fecha_venta) as mes,
+    COUNT(*) as total_ventas,
+    SUM(total) as ingresos_mes
+FROM ventas
+WHERE estado = 'COMPLETADA'
+    AND fecha_venta BETWEEN '2025-01-01' AND '2025-12-31'
+GROUP BY YEAR(fecha_venta), MONTH(fecha_venta)
+ORDER BY anio DESC, mes DESC;
+```
+
+Django ORM:
+
+```
+pythonfrom datetime import datetime
+from django.db.models import Q
+from apps.ventas.models import Venta
+
+# Filtrar ventas por rango de fechas
+fecha_inicio = datetime(2025, 1, 1)
+fecha_fin = datetime(2025, 1, 31, 23, 59, 59)
+
+ventas = Venta.objects.filter(
+    fecha_venta__range=[fecha_inicio, fecha_fin],
+    estado='COMPLETADA'
+).select_related('cliente').order_by('-fecha_venta')
+
+# Ventas con prefetch de detalles
+ventas_con_detalles = Venta.objects.filter(
+    fecha_venta__range=[fecha_inicio, fecha_fin]
+).select_related('cliente').prefetch_related(
+    'detalles__producto'
+).order_by('-fecha_venta')
+
+# Resumen por fecha
+from django.db.models.functions import TruncMonth
+
+resumen_mensual = Venta.objects.filter(
+    estado='COMPLETADA',
+    fecha_venta__year=2025
+).annotate(
+    mes=TruncMonth('fecha_venta')
+).values('mes').annotate(
+    total_ventas=Count('id'),
+    ingresos_mes=Sum('total')
+).order_by('-mes')
+
+# Filtrar ventas de un cliente en un rango de fechas
+ventas_cliente = Venta.objects.filter(
+    cliente_id=1,
+    fecha_venta__gte=fecha_inicio,
+    fecha_venta__lte=fecha_fin
+)
+```
+
+3️. Obtener Cliente con Mayor ConsumoSQL (MySQL):
+sql-- Cliente con mayor consumo (TOP 1)
+
+```
+SELECT 
+    c.id,
+    c.documento,
+    c.first_name,
+    c.last_name,
+    c.email,
+    COUNT(v.id) as total_compras,
+    SUM(v.total) as total_gastado
+FROM clientes c
+INNER JOIN ventas v ON c.id = v.cliente_id
+WHERE v.estado = 'COMPLETADA'
+GROUP BY c.id, c.documento, c.first_name, c.last_name, c.email
+ORDER BY total_gastado DESC
+LIMIT 1;
+```
+
+-- Top 10 clientes con mayor consumo
+
+```
+SELECT 
+    c.id,
+    CONCAT(c.first_name, ' ', c.last_name) as nombre_completo,
+    c.email,
+    c.documento,
+    COUNT(v.id) as total_compras,
+    SUM(v.total) as total_gastado,
+    AVG(v.total) as promedio_compra,
+    MAX(v.fecha_venta) as ultima_compra
+FROM clientes c
+INNER JOIN ventas v ON c.id = v.cliente_id
+WHERE v.estado = 'COMPLETADA'
+GROUP BY c.id, c.first_name, c.last_name, c.email, c.documento
+ORDER BY total_gastado DESC
+LIMIT 10;
+```
+
+-- Clientes con más de X compras
+
+```
+SELECT 
+    c.id,
+    CONCAT(c.first_name, ' ', c.last_name) as nombre_completo,
+    COUNT(v.id) as total_compras,
+    SUM(v.total) as total_gastado
+FROM clientes c
+INNER JOIN ventas v ON c.id = v.cliente_id
+WHERE v.estado = 'COMPLETADA'
+GROUP BY c.id, c.first_name, c.last_name
+HAVING COUNT(v.id) >= 5
+ORDER BY total_gastado DESC;Django ORM:
+pythonfrom django.db.models import Sum, Count, Avg, Max
+from apps.clientes.models import Cliente
+```
+
+ Cliente con mayor consumo (TOP 1):
+
+```
+cliente_top = Cliente.objects.filter(
+    compras__estado='COMPLETADA'
+).annotate(
+    total_compras=Count('compras'),
+    total_gastado=Sum('compras__total'),
+    promedio_compra=Avg('compras__total'),
+    ultima_compra=Max('compras__fecha_venta')
+).order_by('-total_gastado').first()
+```
+
+Top 10 clientes:
+
+```
+top_clientes = Cliente.objects.filter(
+    compras__estado='COMPLETADA'
+).annotate(
+    total_compras=Count('compras'),
+    total_gastado=Sum('compras__total'),
+    promedio_compra=Avg('compras__total')
+).order_by('-total_gastado')[:10]
+```
+
+Clientes con más de 5 compras:
+
+```
+clientes_frecuentes = Cliente.objects.filter(
+    compras__estado='COMPLETADA'
+).annotate(
+    total_compras=Count('compras'),
+    total_gastado=Sum('compras__total')
+).filter(
+    total_compras__gte=5
+).order_by('-total_gastado')
+
+```
+
+Producto más vendido:
+
+```
+from apps.productos.models import Producto
+
+producto_top = Producto.objects.filter(
+    detalleventa__venta__estado='COMPLETADA'
+).annotate(
+    veces_vendido=Count('detalleventa'),
+    unidades_vendidas=Sum('detalleventa__cantidad'),
+    ingresos_generados=Sum('detalleventa__subtotal')
+).order_by('-unidades_vendidas').first()4️⃣ Manejo de Errores de Datos InválidosSQL (MySQL) - Validaciones:
+sql-- Verificar ventas con total = 0 o negativo (datos inválidos)
+SELECT 
+    v.id,
+    v.total,
+    v.fecha_venta,
+    c.email
+FROM ventas v
+INNER JOIN clientes c ON v.cliente_id = c.id
+WHERE v.total <= 0;
+
+-- Verificar detalles de venta con cantidades inválidas
+SELECT 
+    dv.id,
+    dv.venta_id,
+    dv.cantidad,
+    dv.precio_unitario,
+    dv.subtotal,
+    (dv.cantidad * dv.precio_unitario) as subtotal_calculado
+FROM detalle_ventas dv
+WHERE dv.cantidad <= 0 
+    OR dv.precio_unitario <= 0
+    OR dv.subtotal != (dv.cantidad * dv.precio_unitario);
+
+-- Verificar ventas sin detalles (huérfanas)
+SELECT v.*
+FROM ventas v
+LEFT JOIN detalle_ventas dv ON v.id = dv.venta_id
+WHERE dv.id IS NULL;
+
+-- Verificar productos con stock negativo
+SELECT 
+    p.id,
+    p.codigo,
+    p.nombre,
+    p.stock
+FROM productos p
+WHERE p.stock < 0;
+
+-- Verificar clientes inactivos con ventas pendientes
+SELECT 
+    c.id,
+    c.email,
+    c.is_active,
+    COUNT(v.id) as ventas_pendientes
+FROM clientes c
+INNER JOIN ventas v ON c.id = v.cliente_id
+WHERE c.is_active = 0
+    AND v.estado = 'PENDIENTE'
+GROUP BY c.id, c.email, c.is_active;
+
+```
+Django ORM - Validaciones:
+
+```
+pythonfrom django.db.models import F, Q, Count
+from django.core.exceptions import ValidationError
+from apps.ventas.models import Venta, DetalleVenta
+from apps.productos.models import Producto
+from apps.clientes.models import Cliente
+
+# 1. Verificar ventas con total inválido
+ventas_invalidas = Venta.objects.filter(total__lte=0)
+
+# 2. Verificar detalles con cálculos incorrectos
+detalles_invalidos = DetalleVenta.objects.exclude(
+    subtotal=F('cantidad') * F('precio_unitario')
+)
+
+# 3. Verificar ventas sin detalles
+ventas_sin_detalles = Venta.objects.annotate(
+    num_detalles=Count('detalles')
+).filter(num_detalles=0)
+
+# 4. Verificar productos con stock negativo
+productos_stock_negativo = Producto.objects.filter(stock__lt=0)
+
+# 5. Verificar clientes inactivos con ventas
+clientes_inactivos_con_ventas = Cliente.objects.filter(
+    is_active=False,
+    compras__estado='PENDIENTE'
+).distinct()
+
+```
+
+# Función de validación completa
+
+```
+def validar_datos_sistema():
+    """
+    Valida la integridad de los datos del sistema.
+    Retorna un diccionario con los errores encontrados.
+    """
+    errores = {}
+    
+    # Validar ventas
+    ventas_invalidas = Venta.objects.filter(total__lte=0).count()
+    if ventas_invalidas > 0:
+        errores['ventas_total_invalido'] = ventas_invalidas
+    
+    # Validar detalles
+    detalles_invalidos = DetalleVenta.objects.exclude(
+        subtotal=F('cantidad') * F('precio_unitario')
+    ).count()
+    if detalles_invalidos > 0:
+        errores['detalles_calculo_incorrecto'] = detalles_invalidos
+    
+    # Validar productos
+    productos_invalidos = Producto.objects.filter(stock__lt=0).count()
+    if productos_invalidos > 0:
+        errores['productos_stock_negativo'] = productos_invalidos
+    
+    # Validar ventas huérfanas
+    ventas_huerfanas = Venta.objects.annotate(
+        num_detalles=Count('detalles')
+    ).filter(num_detalles=0).count()
+    if ventas_huerfanas > 0:
+        errores['ventas_sin_detalles'] = ventas_huerfanas
+    
+    return errores
+
+# Uso:
+errores = validar_datos_sistema()
+if errores:
+    print("Se encontraron errores:", errores)
+else:
+    print("Datos válidos")
+
+```
 
 
 ## SECCIÓN 3 – DISEÑO Y BUENAS PRÁCTICAS (20%)
