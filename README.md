@@ -341,7 +341,15 @@ documentación: http://127.0.0.1:8000/api/docs (si esta en ejecución)
 
 ## FRONT END:
 
-1. Ejecución 
+1. Variables de entorno:
+
+crea un .env en el root del proyecto y usa
+
+```
+VITE_API_BASE_URL=http://127.0.0.1:8000/api/
+```
+
+2. Ejecución 
 
 - npm install
 - npm run dev
