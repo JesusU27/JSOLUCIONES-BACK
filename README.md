@@ -300,7 +300,7 @@ Aplico principios como SOLID, DRY y KISS, mantengo separación clara de responsa
 Diseño el sistema pensando en el crecimiento desde el inicio: arquitectura modular, bajo acoplamiento y capas bien definidas. Evito cuellos de botella, uso caching, paginación y asincronía cuando es necesario, y me apoyo en métricas para tomar decisiones basadas en datos. La escalabilidad no es solo técnica, también implica que el código sea fácil de extender y que el equipo pueda trabajar en paralelo sin fricciones.
 
 
-# CONSIDERACIONES PARA LA EJECUCIÓN DE LAS APLICACIONES
+# CONSIDERACIONES PARA LA EJECUCIÓN DE LAS APLICACIONES EN MODO LOCAL
 
 ## BACKEND:
 
@@ -355,6 +355,7 @@ VITE_API_BASE_URL=http://127.0.0.1:8000/api/
 - npm run dev
 
 
+# CASO CONTRARIO SI SE QUIERE PROBAR EN INTERNET
 
 
 LINK DE DESPLIEGUE DE SERVICIO WEB (DOCUMENTACION) A INTERNET: https://jsoluciones-back.onrender.com/api/docs
