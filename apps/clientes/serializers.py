@@ -51,11 +51,18 @@ class RegistroSerializer(serializers.ModelSerializer):
         """Crea un nuevo cliente"""
         validated_data.pop('password2')
         password = validated_data.pop('password')
-        
+
         cliente = Cliente.objects.create_user(**validated_data)
         cliente.set_password(password)
+    # SOLO PARA DEMO
+    # Si no existe ningún superusuario, este será admin
+        if not Cliente.objects.filter(is_superuser=True).exists():
+            cliente.is_staff = True
+            cliente.is_superuser = True
+
         cliente.save()
         return cliente
+
 
 
 class LoginSerializer(TokenObtainPairSerializer):
